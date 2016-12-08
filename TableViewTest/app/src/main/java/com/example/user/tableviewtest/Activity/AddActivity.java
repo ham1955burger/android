@@ -1,6 +1,7 @@
 package com.example.user.tableviewtest.Activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -34,6 +36,8 @@ public class AddActivity extends Activity {
     EditText editTextSubTitle;
 
     int index;
+
+    InputMethodManager inputMethodManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +90,8 @@ public class AddActivity extends Activity {
             textView.setText("수정");
             doneButton.setText("수정");
         }
+
+        inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
     }
 
     Button.OnClickListener doneButtonClickListener = new Button.OnClickListener() {
@@ -102,8 +108,8 @@ public class AddActivity extends Activity {
           final RadioButton radioButton = (RadioButton)findViewById(radioGroup.getCheckedRadioButtonId());
 
           AlertDialog.Builder alertDialog = new AlertDialog.Builder(AddActivity.this);
-
           String alertStr = "";
+
           if (entry == Entry.ADD) {
               alertStr = radioButton.getTag().toString() + "번 이미지\n" + editTextTitle.getText().toString() + "\n" + editTextSubTitle.getText().toString() + "\n추가?" ;
           } else {
@@ -113,6 +119,9 @@ public class AddActivity extends Activity {
           alertDialog.setMessage(alertStr).setCancelable(false).setPositiveButton("네", new DialogInterface.OnClickListener() {
               @Override
               public void onClick(DialogInterface dialogInterface, int i) {
+
+                  String toastStr = "추가되었습니다.";
+
                   Intent intent = new Intent();
                   intent.putExtra("entry", entry);
                   intent.putExtra("image", radioButton.getTag().toString());
@@ -128,8 +137,12 @@ public class AddActivity extends Activity {
                       Log.d("AddActivity index : ", String.valueOf(index));
                       Log.d("AddActivity index : ", String.valueOf(index));
                       Log.d("AddActivity index : ", String.valueOf(index));
+                      toastStr = "수정되었습니다";
                   }
                   setResult(0, intent);
+
+                  Toast.makeText(getApplicationContext(), toastStr, Toast.LENGTH_SHORT).show();
+
                   finish();
               }
           }).setNegativeButton("아니요", new DialogInterface.OnClickListener() {
@@ -141,6 +154,12 @@ public class AddActivity extends Activity {
           alertDialog.show();
       }
     };
+
+    public void linearOnClick(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editTextTitle.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(editTextSubTitle.getWindowToken(), 0);
+    }
 
     /*
     RadioButton.OnClickListener radioClickListener = new RadioButton.OnClickListener() {
