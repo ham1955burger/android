@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import timber.log.Timber;
 
 /**
@@ -19,5 +20,10 @@ public class PhotoDetailActivity extends Activity {
         ButterKnife.bind(this);
         Timber.tag("LiftCycles");
         Timber.d("Activity Created");
+    }
+
+    @OnClick(R.id.closeButton)
+    public void actionCloseButton() {
+        finish();
     }
 }
