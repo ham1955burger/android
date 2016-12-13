@@ -22,8 +22,7 @@ public class PhotoDetailActivity extends Activity {
         Timber.d("Activity Created");
     }
 
-    @OnClick(R.id.closeButton)
-    public void actionCloseButton() {
+    @OnClick(R.id.closeButton) void actionCloseButton() {
         finish();
     }
 }
