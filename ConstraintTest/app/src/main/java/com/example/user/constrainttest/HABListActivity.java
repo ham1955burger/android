@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -43,7 +42,11 @@ public class HABListActivity extends Activity {
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
         getList();
     }
 
@@ -51,9 +54,10 @@ public class HABListActivity extends Activity {
         finish();
     }
 
-    @OnClick(R.id.addButton) void actionAddButon(Button button) {
+    @OnClick(R.id.submitButton) void actionAddButon(Button button) {
         Intent intent = new Intent(HABListActivity.this, HABDetailActivity.class);
-        startActivityForResult(intent, 0);
+        intent.putExtra("entry", Entry.ADD);
+        startActivity(intent);
     }
 
     private void getList() {
@@ -71,10 +75,42 @@ public class HABListActivity extends Activity {
                     emptyTextView.setVisibility(View.INVISIBLE);
                 }
                 adapter = new HABListAdapter(list);
+                adapter.setInterfaceHABListAdapter(new HABListAdapter.InterfaceHABListAdapter() {
+                    @Override
+                    public void clickedItem(int position) {
+                        Log.d(TAG, String.valueOf(position));
+                        Intent intent = new Intent(HABListActivity.this, HABDetailActivity.class);
+                        intent.putExtra("entry", Entry.EDIT);
+                        intent.putExtra("info", list.get(position));
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void deletedItem(int position) {
+                        deleteItem(position);
+                    }
+                });
                 recyclerView.setAdapter(adapter);
             }
             @Override
             public void onFailure(Call<ArrayList<HouseholdAccountBook>> call, Throwable t) {
+                Log.e(TAG, t.toString());
+            }
+        });
+    }
+
+    private void deleteItem(int position) {
+        InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
+
+        Call<Void> call = apiService.deleteHAB(list.get(position).getPk());
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                getList();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
                 Log.e(TAG, t.toString());
             }
         });

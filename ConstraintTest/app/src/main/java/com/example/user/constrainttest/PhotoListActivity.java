@@ -27,7 +27,7 @@ public class PhotoListActivity extends Activity{
         finish();
     }
 
-    @OnClick(R.id.addButton)
+    @OnClick(R.id.submitButton)
     public void actionAddButton() {
         Intent intent = new Intent(PhotoListActivity.this, PhotoDetailActivity.class);
         startActivity(intent);

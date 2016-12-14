@@ -2,11 +2,13 @@ package com.example.user.constrainttest;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by user on 12/13/16.
  */
 
-public class HouseholdAccountBook {
+public class HouseholdAccountBook implements Serializable {
     @SerializedName("pk")
     private int pk;
 

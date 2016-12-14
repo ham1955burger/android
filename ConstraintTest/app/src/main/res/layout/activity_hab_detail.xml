@@ -3,10 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/rootConstraintLayout">
 
     <android.support.constraint.ConstraintLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:id="@+id/constraintLayout"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -71,7 +72,7 @@
             android:text="Receive"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/radioButton1"
+            android:id="@+id/receiveRadioButton"
             android:checked="true"
             android:paddingRight="10dp" />
 
@@ -79,7 +80,7 @@
             android:text="Pay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/radioButton2"
+            android:id="@+id/payRadioButton"
             android:layout_weight="0.25"
             android:paddingRight="10dp" />
     </RadioGroup>
@@ -102,15 +103,17 @@
             android:text="Date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/dateTextView"
             android:padding="5dp"
             android:layout_marginRight="24dp"/>
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/dateEditText"
             android:hint="Date"
-            android:maxLines="1"/>
+            android:maxLines="1"
+            android:imeOptions="actionDone"
+            android:inputType="text"/>
     </LinearLayout>
 
     <LinearLayout
@@ -131,15 +134,17 @@
             android:text="Price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/priceTextView"
             android:padding="5dp"
             android:layout_marginRight="22dp"/>
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/priceEditText"
             android:hint="Price"
-            android:maxLines="1"/>
+            android:maxLines="1"
+            android:imeOptions="actionDone"
+            android:inputType="text"/>
     </LinearLayout>
 
     <LinearLayout
@@ -160,15 +165,16 @@
             android:text="Category"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/priceTextView"
-            android:padding="5dp"
-            android:id="@+id/categoryTextView"/>
+            android:padding="5dp" />
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/categoryEditText"
             android:hint="category"
-            android:maxLines="1"/>
+            android:maxLines="1"
+            android:imeOptions="actionDone"
+            android:inputType="text"/>
     </LinearLayout>
 
     <LinearLayout
@@ -189,7 +195,6 @@
             android:text="Memo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/memoTextView"
             app:layout_constraintTop_toBottomOf="@+id/categoryTextView"
             android:padding="5dp"
             android:layout_marginRight="18dp"/>
@@ -197,8 +202,11 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/memoEditText"
             android:hint="Memo"
-            android:maxLines="2"/>
+            android:maxLines="2"
+            android:imeOptions="actionDone"
+            android:inputType="text"/>
     </LinearLayout>
 
     <Button
@@ -219,7 +227,7 @@
         android:text="Add"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:id="@+id/addButton"
+        android:id="@+id/submitButton"
         app:layout_constraintBottom_toTopOf="@+id/removeAllButton"
         android:layout_marginBottom="8dp"
         app:layout_constraintRight_toRightOf="parent"
@@ -228,6 +236,5 @@
         android:layout_marginLeft="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp" />
-
 
 </android.support.constraint.ConstraintLayout>
