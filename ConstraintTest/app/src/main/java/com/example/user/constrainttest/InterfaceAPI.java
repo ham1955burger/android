@@ -2,6 +2,8 @@ package com.example.user.constrainttest;
 
 import java.util.ArrayList;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -12,6 +14,7 @@ import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 
 /**
@@ -19,11 +22,11 @@ import retrofit2.http.Path;
  */
 
 public interface InterfaceAPI {
-    @GET("list/")
+    @GET("/list/")
     Call<ArrayList<HouseholdAccountBook>> getHABList();
 
     @FormUrlEncoded
-    @POST("list/")
+    @POST("/list/")
     Call<Void> postHAB(
             @Field("state") String state,
             @Field("date") String date,
@@ -33,14 +36,37 @@ public interface InterfaceAPI {
     );
 
 //    @Headers( "Content-Type: application/json" )
-    @PUT("detail/{pk}")
+    @PUT("/detail/{pk}")
     Call<Void> putHAB(
             @Path("pk") int pk,
             @Body HABDataSend habDataSend
     );
 
-    @DELETE("detail/{pk}")
+    @DELETE("/detail/{pk}")
     Call<Void> deleteHAB(
+            @Path("pk") int pk
+    );
+
+    @GET("/photo")
+    Call<ArrayList<PhotoBook>> getPhotoList();
+
+    @Multipart
+    @POST("/photo")
+    Call<Void> postPhoto(
+            @Part MultipartBody.Part image,
+            @Part("description") RequestBody description
+    );
+
+    //    @Headers( "Content-Type: application/json" )
+    @PUT("/photo/detail/{pk}")
+    Call<Void> putPhoto(
+            @Path("pk") int pk,
+            @Part MultipartBody.Part image,
+            @Body PhotoBook photoBook
+    );
+
+    @DELETE("/photo/detail/{pk}")
+    Call<Void> deletePhoto(
             @Path("pk") int pk
     );
 

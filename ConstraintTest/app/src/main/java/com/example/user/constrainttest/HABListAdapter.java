@@ -90,6 +90,7 @@ public class HABListAdapter extends RecyclerView.Adapter<HABListAdapter.ViewHold
 
             swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
             swipeLayout.addDrag(SwipeLayout.DragEdge.Top, bottomWrapperLinearLayout);
+            swipeLayout.setClickToClose(true);
             swipeLayout.addSwipeListener(new SwipeLayout.SwipeListener() {
                 @Override
                 public void onStartOpen(SwipeLayout layout) {

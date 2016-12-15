@@ -24,7 +24,7 @@ public class ServiceGenerator {
         return retrofit.create(serviceClass);
     }*/
 
-    public static final String BASE_URL = "http://192.168.0.9:8080/";
+    public static final String BASE_URL = "http://192.168.0.9:8080";
     private static Retrofit retrofit = null;
 
     public static Retrofit getClient() {
