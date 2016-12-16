@@ -1,6 +1,8 @@
 package com.example.user.constrainttest;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,6 +11,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.example.user.constrainttest.HAB.HABListAdapter;
+import com.example.user.constrainttest.HAB.HouseholdAccountBook;
+import com.example.user.constrainttest.Network.InterfaceAPI;
+import com.example.user.constrainttest.Network.ServiceGenerator;
 
 import java.util.ArrayList;
 
@@ -99,20 +106,36 @@ public class HABListActivity extends Activity {
         });
     }
 
-    private void deleteItem(int position) {
-        InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
+    private void deleteItem(final int position) {
+        AlertDialog.Builder alert_confirm = new AlertDialog.Builder(HABListActivity.this);
+        alert_confirm.setMessage("삭제하시겠습니까?").setCancelable(false).setPositiveButton("네",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
 
-        Call<Void> call = apiService.deleteHAB(list.get(position).getPk());
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                getList();
-            }
+                        Call<Void> call = apiService.deleteHAB(list.get(position).getPk());
+                        call.enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                getList();
+                            }
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                                Log.e(TAG, t.toString());
+                            }
+                        });
+                    }
+                }).setNegativeButton("아니요",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+//                        HABListAdapter.ViewHolder viewHolder =  adapter.getItemViewType(position);
+                        return;
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Log.e(TAG, t.toString());
-            }
-        });
+                    }
+                });
+        AlertDialog alert = alert_confirm.create();
+        alert.show();
     }
 }

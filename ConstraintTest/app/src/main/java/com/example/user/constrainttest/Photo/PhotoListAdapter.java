@@ -1,16 +1,14 @@
-package com.example.user.constrainttest;
+package com.example.user.constrainttest.Photo;
 
-import android.app.Activity;
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
+import com.example.user.constrainttest.Network.ServiceGenerator;
+import com.example.user.constrainttest.PhotoListActivity;
+import com.example.user.constrainttest.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -29,14 +27,15 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.View
         this.photoListItems = photoListItems;
     }
 
-    private InterfacePhotoListAdapter interfaceHABListAdapter;
+    private InterfacePhotoListAdapter interfacePhotoListAdapter;
 
     public void setInterfacePhotoListAdapter(InterfacePhotoListAdapter event) {
-        this.interfaceHABListAdapter = event;
+        this.interfacePhotoListAdapter = event;
     }
 
     public interface InterfacePhotoListAdapter {
         void clickedItem(PhotoBook photoDetail);
+        void longClickedItem(int position);
     }
 
     @Override
@@ -53,7 +52,15 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.View
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                interfaceHABListAdapter.clickedItem(photoListItems.get(holder.getAdapterPosition()));
+                interfacePhotoListAdapter.clickedItem(photoListItems.get(holder.getAdapterPosition()));
+            }
+        });
+
+        holder.imageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                interfacePhotoListAdapter.longClickedItem(holder.getAdapterPosition());
+                return true;
             }
         });
     }

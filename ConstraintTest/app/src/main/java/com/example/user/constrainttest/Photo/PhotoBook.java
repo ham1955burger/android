@@ -1,4 +1,4 @@
-package com.example.user.constrainttest;
+package com.example.user.constrainttest.Photo;
 
 import com.google.gson.annotations.SerializedName;
 

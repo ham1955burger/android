@@ -1,19 +1,26 @@
 package com.example.user.constrainttest;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
-import java.util.ArrayList;
+import com.example.user.constrainttest.HAB.HouseholdAccountBook;
+import com.example.user.constrainttest.Network.InterfaceAPI;
+import com.example.user.constrainttest.Network.ServiceGenerator;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,12 +53,14 @@ public class HABDetailActivity extends Activity {
 
     Entry entry;
     HouseholdAccountBook info;
+    InputMethodManager imm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hab_detail);
         ButterKnife.bind(this);
+        imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         Timber.tag("LiftCycles");
         Timber.d("Activity Created");
 
@@ -76,7 +85,6 @@ public class HABDetailActivity extends Activity {
             categoryEditText.setText(info.getCategory());
             memoEditText.setText(info.getMemo());
         }
-
     }
 
     @OnClick(R.id.closeButton) void actionClose(Button button) {
@@ -98,8 +106,7 @@ public class HABDetailActivity extends Activity {
         memoEditText.setText("");
     }
 
-    @OnClick(R.id.rootConstraintLayout) void hideKeyboard(ConstraintLayout constraintLayout) {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+    @OnClick(R.id.rootConstraintLayout) void hideKeyboard() {
         imm.hideSoftInputFromWindow(dateEditText.getWindowToken(), 0);
         imm.hideSoftInputFromWindow(priceEditText.getWindowToken(), 0);
         imm.hideSoftInputFromWindow(categoryEditText.getWindowToken(), 0);
@@ -107,6 +114,25 @@ public class HABDetailActivity extends Activity {
     }
 
     private void post() {
+        if (TextUtils.isEmpty(dateEditText.getText().toString().trim())) {
+            setFocusEditText(dateEditText);
+            Toast.makeText(this, "date empty!", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (TextUtils.isEmpty(priceEditText.getText().toString().trim())) {
+            setFocusEditText(priceEditText);
+            Toast.makeText(this, "price empty!", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (TextUtils.isEmpty(categoryEditText.getText().toString().trim())) {
+            setFocusEditText(categoryEditText);
+            Toast.makeText(this, "category empty!", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (TextUtils.isEmpty(memoEditText.getText().toString().trim())) {
+            setFocusEditText(memoEditText);
+            Toast.makeText(this, "memo empty!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
         InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
 
         RadioButton checkedRadioButton = (RadioButton) findViewById(radioGroup.getCheckedRadioButtonId());
@@ -129,7 +155,9 @@ public class HABDetailActivity extends Activity {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                Log.d(TAG, String.valueOf(response.code()));
+                Log.d(TAG, response.toString());
+                Log.d(TAG, response.raw().message());
+                Log.d(TAG, String.valueOf(response.message()));
                 finish();
             }
 
@@ -141,35 +169,89 @@ public class HABDetailActivity extends Activity {
     }
 
     private void put() {
-        InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
+        final RadioButton checkedRadioButton = (RadioButton) findViewById(radioGroup.getCheckedRadioButtonId());
 
-        RadioButton checkedRadioButton = (RadioButton) findViewById(radioGroup.getCheckedRadioButtonId());
+        if (
+                info.getState().equals(checkedRadioButton.getText().toString().toLowerCase()) &&
+                info.getDate().equals(dateEditText.getText().toString()) &&
+                String.valueOf(info.getPrice()).equals(priceEditText.getText().toString()) &&
+                info.getCategory().equals(categoryEditText.getText().toString()) &&
+                info.getMemo().equals(memoEditText.getText().toString())
+           ) {
+            Toast.makeText(this, "no changed!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        Log.d(TAG, checkedRadioButton.getText().toString());
-        Log.d(TAG, dateEditText.getText().toString());
-        Log.d(TAG, priceEditText.getText().toString());
-        Log.d(TAG, categoryEditText.getText().toString());
-        Log.d(TAG, memoEditText.getText().toString());
+        AlertDialog.Builder alert_confirm = new AlertDialog.Builder(HABDetailActivity.this);
+        alert_confirm.setMessage("수정하시겠습니까?").setCancelable(false).setPositiveButton("네",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
 
+                        Log.d(TAG, checkedRadioButton.getText().toString());
+                        Log.d(TAG, dateEditText.getText().toString());
+                        Log.d(TAG, priceEditText.getText().toString());
+                        Log.d(TAG, categoryEditText.getText().toString());
+                        Log.d(TAG, memoEditText.getText().toString());
 
-        HABDataSend habDataSend = new HABDataSend();
-        habDataSend.setDate("2016-12-13");
+                        Map<String, Object> data = new HashMap<>();
 
+                        if (!info.getState().equals(checkedRadioButton.getText().toString().toLowerCase())) {
+                            data.put("state", checkedRadioButton.getText().toString().toLowerCase());
+                        }
 
-        Call<Void> call = apiService.putHAB(info.getPk(), habDataSend);
+                        if (!(info.getDate().equals(dateEditText.getText().toString()))) {
+                            data.put("date", dateEditText.getText().toString());
+                        }
 
+                        if (!String.valueOf(info.getPrice()).equals(priceEditText.getText().toString())) {
+                            data.put("price", priceEditText.getText().toString());
+                        }
 
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                Log.d(TAG, String.valueOf(response.code()));
-                finish();
-            }
+                        if (!info.getCategory().equals(categoryEditText.getText().toString())) {
+                            data.put("category", categoryEditText.getText().toString());
+                        }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Log.d(TAG, t.toString());
-            }
-        });
+                        if (!info.getMemo().equals(memoEditText.getText().toString())) {
+                            data.put("memo", memoEditText.getText().toString());
+                        }
+
+                        /*
+                        HABDataSend habDataSend = new HABDataSend();
+                        habDataSend.setDate("2016-12-13");
+                        */
+
+                        Call<Void> call = apiService.putHAB(info.getPk(), data);
+
+                        call.enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                Log.d(TAG, String.valueOf(response.code()));
+                                finish();
+                            }
+
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                                Log.d(TAG, t.toString());
+                            }
+                        });
+                    }
+                }).setNegativeButton("아니요",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 'No'
+                        return;
+                    }
+                });
+        AlertDialog alert = alert_confirm.create();
+        alert.show();
+    }
+
+    private void setFocusEditText(EditText editText) {
+        editText.requestFocus();
+        editText.setCursorVisible(true);
+        imm.showSoftInput(editText, 0);
     }
 }

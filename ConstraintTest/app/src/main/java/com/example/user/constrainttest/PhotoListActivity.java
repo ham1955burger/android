@@ -1,17 +1,22 @@
 package com.example.user.constrainttest;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.user.constrainttest.Network.InterfaceAPI;
+import com.example.user.constrainttest.Network.ServiceGenerator;
+import com.example.user.constrainttest.Photo.PhotoBook;
+import com.example.user.constrainttest.Photo.PhotoListAdapter;
 
 import java.util.ArrayList;
 
@@ -91,6 +96,10 @@ public class PhotoListActivity extends Activity{
                         intent.putExtra("info", photoDetail);
                         startActivity(intent);
                     }
+                    @Override
+                    public void longClickedItem(int position) {
+                        deletePhoto(position);
+                    }
                 });
                 recyclerView.setAdapter(adapter);
             }
@@ -102,4 +111,36 @@ public class PhotoListActivity extends Activity{
         });
     }
 
+    private void deletePhoto(final int position) {
+        AlertDialog.Builder alert_confirm = new AlertDialog.Builder(PhotoListActivity.this);
+        alert_confirm.setMessage("삭제하시겠습니까?").setCancelable(false).setPositiveButton("네",
+            new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
+
+                    Call<Void> call = apiService.deletePhoto(photoList.get(position).getPk());
+                    call.enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            Toast.makeText(PhotoListActivity.this, "Deleted photo!", Toast.LENGTH_SHORT).show();
+                            getPhotoList();
+                        }
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            Log.e(TAG, t.toString());
+                        }
+                    });
+                }
+            }).setNegativeButton("아니요",
+            new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    return;
+
+                }
+            });
+        AlertDialog alert = alert_confirm.create();
+        alert.show();
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.user.constrainttest;
+package com.example.user.constrainttest.Network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

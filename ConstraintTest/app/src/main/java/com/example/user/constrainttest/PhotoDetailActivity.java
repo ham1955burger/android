@@ -7,13 +7,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
-import android.util.Base64;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -21,12 +19,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.user.constrainttest.Network.InterfaceAPI;
+import com.example.user.constrainttest.Network.ServiceGenerator;
+import com.example.user.constrainttest.Photo.PhotoBook;
+import com.example.user.constrainttest.Util.Utility;
 import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,7 +50,7 @@ public class PhotoDetailActivity extends Activity {
     @BindView(R.id.imageView) ImageView imageView;
     @BindView(R.id.ImageTextView) TextView imageTextView;
     @BindView(R.id.createdDateTextView) TextView createdDateTextView;
-    @BindView(R.id.discriptionEditText) EditText discriptionEditText;
+    @BindView(R.id.discriptionEditText) EditText descriptionEditText;
     @BindView(R.id.submitButton) Button submitButton;
 
     Entry entry;
@@ -66,6 +70,7 @@ public class PhotoDetailActivity extends Activity {
         entry = (Entry) intent.getExtras().get("entry");
 
         if (entry == Entry.EDIT) {
+            createdDateTextView.setVisibility(View.VISIBLE);
             submitButton.setText("EDIT");
             imageTextView.setVisibility(View.INVISIBLE);
             info = (PhotoBook) intent.getExtras().get("info");
@@ -74,8 +79,9 @@ public class PhotoDetailActivity extends Activity {
 
             Picasso.with(this).load(ServiceGenerator.BASE_URL + info.getImageThumbFile()).into(imageView);
             createdDateTextView.setText(format.format(info.getCreatedAt()));
-            discriptionEditText.setText(info.getDescription());
-
+            descriptionEditText.setText(info.getDescription());
+        } else {
+            createdDateTextView.setVisibility(View.GONE);
         }
 
     }
@@ -93,23 +99,14 @@ public class PhotoDetailActivity extends Activity {
                 break;
             case 1:
                 if(resultCode == RESULT_OK){
+                    imageTextView.setVisibility(View.INVISIBLE);
                     Uri selectedImage = imageReturnedIntent.getData();
                     imageView.setImageURI(selectedImage);
                     Log.d("11111111", selectedImage.getPath());
-                    Log.d("11111111", selectedImage.getPath());
-                    Log.d("11111111", selectedImage.getPath());
-                    Log.d("11111111", selectedImage.getPath());
-
-//                    String str = selectedImage.getPath();
-
+//                    String str = selectedImage.getPath(););
                     Log.d("11111111", getRealPathFromURI(selectedImage));
-                    Log.d("11111111", getRealPathFromURI(selectedImage));
-                    Log.d("11111111", getRealPathFromURI(selectedImage));
-                    Log.d("11111111", getRealPathFromURI(selectedImage));
-
 
                     file = new File(getRealPathFromURI(selectedImage));
-
                 }
                 break;
         }
@@ -143,27 +140,27 @@ public class PhotoDetailActivity extends Activity {
         if (entry == Entry.ADD) {
             postPhoto();
         } else {
-//            putPhoto();
+            putPhoto();
         }
 
     }
 
-
     @OnClick(R.id.rootConstraintLayout) void hideKeyboard(ConstraintLayout constraintLayout) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(discriptionEditText.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(descriptionEditText.getWindowToken(), 0);
     }
 
     private void postPhoto() {
+//        if (file == null) {
+        if (null == imageView.getDrawable()) {
+            Toast.makeText(this, "no attached image!", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (TextUtils.isEmpty(descriptionEditText.getText().toString().trim())) {
+            Toast.makeText(this, "description is empty!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
-
-        /*
-        Bitmap bitmap = ((BitmapDrawable)imageView.getBackground()).getBitmap();
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte [] byte_arr = stream.toByteArray();
-        image = Base64.encodeToString(byte_arr, Base64.DEFAULT);*/
 
         // create RequestBody instance from file
         RequestBody requestFile =
@@ -171,27 +168,52 @@ public class PhotoDetailActivity extends Activity {
         // MultipartBody.Part is used to send also the actual file name
         MultipartBody.Part body =
                 MultipartBody.Part.createFormData("image_file", file.getName(), requestFile);
-
-
-        PhotoBook photoBook = new PhotoBook();
-        photoBook.setDescription("ddddddddd");
-
-        String descriptionString = "hello, description goes here";
         RequestBody description =
                 RequestBody.create(
-                        MediaType.parse("multipart/form-data"), descriptionString);
+                        MediaType.parse("multipart/form-data"), descriptionEditText.getText().toString());
+
 
         Call<Void> call = apiService.postPhoto(body, description);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                Log.d("dddddddd", String.valueOf(response.code()));
                 finish();
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Log.d("dddddddd", t.toString());
+                Log.d("DDDDDDDDD", t.toString());
+            }
+        });
+    }
+
+    private void putPhoto() {
+        InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
+
+        //TODO: 조건추가
+        Map<String, RequestBody> data = new HashMap<>();
+
+        //description
+        RequestBody description =
+                RequestBody.create(
+                        MediaType.parse("multipart/form-data"), descriptionEditText.getText().toString());
+        data.put("description", description);
+
+        //image
+        RequestBody fileBody = RequestBody.create(MediaType.parse("image/*"), file);
+        data.put("file\"; filename=\"file.name\"", fileBody);
+
+
+        Call<Void> call = apiService.putPhoto(info.getPk(), data);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.d("DDDDDD", t.toString());
             }
         });
     }

@@ -1,4 +1,4 @@
-package com.example.user.constrainttest;
+package com.example.user.constrainttest.HAB;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.daimajia.swipe.SwipeLayout;
+import com.example.user.constrainttest.R;
 
 import java.util.ArrayList;
 
@@ -69,7 +70,7 @@ public class HABListAdapter extends RecyclerView.Adapter<HABListAdapter.ViewHold
         this.habListItems = habListItems;
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.swipeLayout) SwipeLayout swipeLayout;
         @BindView(R.id.bottom_wrapper) LinearLayout bottomWrapperLinearLayout;
         @BindView(R.id.deleteButton) Button deleteButton;
