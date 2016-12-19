@@ -188,34 +188,57 @@ public class PhotoDetailActivity extends Activity {
     }
 
     private void putPhoto() {
-        InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
+        if (file == null &&
+                info.getDescription().equals(descriptionEditText.getText().toString())) {
+            Toast.makeText(this, "no changed!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        //TODO: 조건추가
-        Map<String, RequestBody> data = new HashMap<>();
+        AlertDialog.Builder alert_confirm = new AlertDialog.Builder(PhotoDetailActivity.this);
+        alert_confirm.setMessage("수정하시겠습니까?").setCancelable(false).setPositiveButton("네",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        InterfaceAPI apiService = ServiceGenerator.getClient().create(InterfaceAPI.class);
+                        Map<String, RequestBody> data = new HashMap<>();
 
-        //description
-        RequestBody description =
-                RequestBody.create(
-                        MediaType.parse("multipart/form-data"), descriptionEditText.getText().toString());
-        data.put("description", description);
+                        if (file != null) {
+                            //image
+                            RequestBody fileBody = RequestBody.create(MediaType.parse("image/*"), file);
+                            data.put("image_file\"; filename=\"file.name\"", fileBody);
+                        }
 
-        //image
-        RequestBody fileBody = RequestBody.create(MediaType.parse("image/*"), file);
-        data.put("file\"; filename=\"file.name\"", fileBody);
+                        if (!info.getDescription().equals(descriptionEditText.getText().toString())) {
+                            //description
+                            RequestBody description =
+                                    RequestBody.create(
+                                            MediaType.parse("multipart/form-data"), descriptionEditText.getText().toString());
+                            data.put("description", description);
+                        }
 
+                        Call<Void> call = apiService.putPhoto(info.getPk(), data);
+                        call.enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                Toast.makeText(PhotoDetailActivity.this, "update ok!", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
 
-        Call<Void> call = apiService.putPhoto(info.getPk(), data);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                finish();
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Log.d("DDDDDD", t.toString());
-            }
-        });
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                                Log.d("DDDDDD", t.toString());
+                            }
+                        });
+                    }
+                }).setNegativeButton("아니요",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        return;
+                    }
+                });
+        AlertDialog alert = alert_confirm.create();
+        alert.show();
     }
 
     private void selectImage() {
